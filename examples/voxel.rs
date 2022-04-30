@@ -11,6 +11,7 @@ fn main() {
     })
     .insert_resource(Msaa { samples: 4 })
     .add_plugins(DefaultPlugins)
+    .add_plugin(debug::DebugUIPlugin)
     .add_plugin(VoxelTerrainPlugin)
     .add_plugin(camera::RtsCameraPlugin)
     .add_startup_system(setup)
