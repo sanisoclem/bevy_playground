@@ -13,7 +13,8 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_plugin(debug::DebugUIPlugin)
     .add_plugin(VoxelTerrainPlugin)
-    .add_plugin(camera::RtsCameraPlugin)
+    //.add_plugin(camera::RtsCameraPlugin)
+    .add_plugin(camera::SpectatorCameraPlugin)
     .add_startup_system(setup)
     .add_system(add_chunk_spawner)
     .run();
@@ -45,7 +46,7 @@ fn setup(
 
 fn add_chunk_spawner(
   mut commands: Commands,
-  qry: Query<Entity, (With<camera::RtsCamera>, Without<ChunkSpawner>)>,
+  qry: Query<Entity, (With<camera::SpectatorCamera>, Without<ChunkSpawner>)>,
 ) {
   for entity in qry.iter() {
     commands.entity(entity).insert(ChunkSpawner::default());
