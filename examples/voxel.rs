@@ -27,9 +27,12 @@ fn setup(
 ) {
   // cube
   commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-    material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-    transform: Transform::from_xyz(0.0, 10.5, 0.0),
+    mesh: meshes.add(Mesh::from(shape::Cube { size: 4.0 })),
+    material: materials.add(StandardMaterial {
+      base_color: Color::LIME_GREEN,
+      ..default()
+    }),
+    transform: Transform::from_xyz(0.0, 20.5, 0.0),
     ..default()
   });
   // light
@@ -40,6 +43,37 @@ fn setup(
       ..default()
     },
     transform: Transform::from_xyz(4.0, 20.0, 4.0),
+    ..default()
+  });
+
+  // ambient light
+  commands.insert_resource(AmbientLight {
+    color: Color::ORANGE_RED,
+    brightness: 0.02,
+  });
+
+  // directional 'sun' light
+  const HALF_SIZE: f32 = 10.0;
+  commands.spawn_bundle(DirectionalLightBundle {
+    directional_light: DirectionalLight {
+      illuminance: 10000.0,
+      shadow_projection: OrthographicProjection {
+        left: -HALF_SIZE,
+        right: HALF_SIZE,
+        bottom: -HALF_SIZE,
+        top: HALF_SIZE,
+        near: -10.0 * HALF_SIZE,
+        far: 10.0 * HALF_SIZE,
+        ..default()
+      },
+      shadows_enabled: true,
+      ..default()
+    },
+    transform: Transform {
+      translation: Vec3::new(0.0, 2.0, 0.0),
+      rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4),
+      ..default()
+    },
     ..default()
   });
 }

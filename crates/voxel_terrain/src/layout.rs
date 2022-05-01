@@ -153,7 +153,11 @@ impl CubicVoxelLayout {
       voxel_side_length,
       chunk_voxel_length,
       chunk_voxel_height,
-      shape: RuntimeShape::<u32, 3>::new([side_length + 2, chunk_voxel_height + 2, side_length + 2]),
+      shape: RuntimeShape::<u32, 3>::new([
+        side_length + 2,
+        chunk_voxel_height + 2,
+        side_length + 2,
+      ]),
     }
   }
 
@@ -227,7 +231,7 @@ impl CubicVoxelLayout {
 }
 impl Default for CubicVoxelLayout {
   fn default() -> Self {
-    Self::new(ChunkId::default(), 1.0, 11, 10)
+    Self::new(ChunkId::default(), 1.0, 50, 20)
   }
 }
 

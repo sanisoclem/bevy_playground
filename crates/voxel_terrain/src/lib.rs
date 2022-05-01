@@ -76,7 +76,7 @@ pub fn spawn_chunks(
     }
 
     // find neighboring chunks
-    let neighbors = layout.get_chunk_neighbors(&current_chunk, 2);
+    let neighbors = layout.get_chunk_neighbors(&current_chunk, 4);
 
     // spawn chunks
     for chunk in std::iter::once(current_chunk).chain(neighbors) {
@@ -184,7 +184,11 @@ pub fn attach_chunk_mesh(
 
       commands.entity(entity).insert_bundle(PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(Color::rgb(0.5, 0.0, 0.3).into()),
+        material: materials.add(StandardMaterial {
+          base_color: Color::LIME_GREEN,
+          perceptual_roughness: 1.0,
+          ..default()
+        }),
         transform: Transform::from_translation(layout.chunk_to_space(&chunk.id)),
         ..default()
       });
@@ -199,7 +203,7 @@ pub fn despawn_chunks(
 ) {
   for (entity, chunk) in qry.iter() {
     // TODO: figure out proper criteria for despawning
-    if chunk.distance_to_nearest_spawner > 10000.0 && tracker.try_despawn(&chunk.id) {
+    if chunk.distance_to_nearest_spawner > 1000.0 && tracker.try_despawn(&chunk.id) {
       commands.entity(entity).despawn_recursive();
     }
   }

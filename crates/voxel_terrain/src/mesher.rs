@@ -35,14 +35,12 @@ pub fn generate_mesh(
     let scale = 1.0;
     let mut mesh_buffer = GreedyQuadsBuffer::new(shape.usize());
 
-    info!("generating mesh, voxel count: {}, shape bounds: {:?}, shape size: {:?}", v.len(), shape.as_array(), shape.usize());
-
-    let [x,y,z] = shape.as_array();
+    let [x, y, z] = shape.as_array();
     greedy_quads(
       &v,
       &shape,
       [0; 3],
-      [x-1, y-1, z-1],
+      [x - 1, y - 1, z - 1],
       &RIGHT_HANDED_Y_UP_CONFIG.faces,
       &mut mesh_buffer,
     );
@@ -65,10 +63,14 @@ pub fn generate_mesh(
       .enumerate()
     {
       for quad in group.into_iter() {
-        indices.extend_from_slice(&face.quad_mesh_indices(positions.len() as u32));
-        normals.extend_from_slice(&face.quad_mesh_normals());
-        uvs.extend_from_slice(&face.tex_coords(block_mesh::geometry::Axis::Y, false, &quad));
-        positions.extend_from_slice(&face.quad_mesh_positions(&quad, scale));
+        let i = face.quad_mesh_indices(positions.len() as u32);
+        let p = face.quad_mesh_positions(&quad, scale);
+        let n = face.quad_mesh_normals(); // calculate_normals(&p, &i);
+
+        indices.extend_from_slice(&i);
+        positions.extend_from_slice(&p);
+        normals.extend_from_slice(&n);
+        uvs.extend_from_slice(&face.tex_coords(block_mesh::geometry::Axis::Z, false, &quad));
       }
     }
 
@@ -84,3 +86,23 @@ pub fn generate_mesh(
     mesh
   })
 }
+
+// fn calculate_normals(vertices: &[[f32; 3]], indices: &[u32]) -> Vec<[f32; 3]> {
+//   let mut normals = vec![Vec3::default(); vertices.len()];
+//   let num_faces = indices.len() / 3;
+//   {
+//       for face in 0..num_faces {
+//           let i0 = face * 3;
+//           let i1 = i0 + 1;
+//           let i2 = i0 + 2;
+//           let a = Vec3::from(vertices[indices[i0] as usize]);
+//           let b = Vec3::from(vertices[indices[i1] as usize]);
+//           let c = Vec3::from(vertices[indices[i2] as usize]);
+//           let n = (b - a).cross(c - a);
+//           normals[indices[i0] as usize] += n;
+//           normals[indices[i1] as usize] += n;
+//           normals[indices[i2] as usize] += n;
+//       }
+//   }
+//   normals.into_iter().map(|n| n.normalize()).map(|n| [n.x, n.y, n.z]).collect()
+// }
