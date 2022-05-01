@@ -1,16 +1,15 @@
-use std::f32::consts::FRAC_PI_2;
-use bevy::input::mouse::MouseMotion;
 use bevy::{
-  input::{keyboard::KeyCode, Input},
+  input::{keyboard::KeyCode, mouse::MouseMotion, Input},
   prelude::*,
 };
+use std::f32::consts::FRAC_PI_2;
 
 #[derive(Component)]
 pub struct SpectatorCamera {
   speed: f32,
   sensitivity: f32,
   pitch: f32,
-  yaw: f32
+  yaw: f32,
 }
 
 impl Default for SpectatorCamera {
@@ -19,7 +18,7 @@ impl Default for SpectatorCamera {
       speed: 100.0,
       sensitivity: 0.1,
       pitch: 0.0,
-      yaw: 0.0
+      yaw: 0.0,
     }
   }
 }
@@ -93,19 +92,18 @@ fn camera_movement_system(
 
     transform.translation += delta_f + delta_strafe + delta_float;
 
-      let mut delta = Vec2::ZERO;
-      for mouse_move in mouse_motion_event_reader.iter() {
-        delta += mouse_move.delta;
-      }
-
-      if delta == Vec2::ZERO {
-        return;
-      }
-      options.pitch = (options.pitch + delta.y * options.sensitivity * delta_time).clamp(-FRAC_PI_2 + 1.0, FRAC_PI_2);
-      options.yaw = options.yaw - delta.x * options.sensitivity * delta_time;
-      info!("{:?}", options.yaw);
-      transform.rotation = Quat::from_axis_angle(Vec3::Y, options.yaw);
-      transform.rotation *= Quat::from_axis_angle(-Vec3::X, options.pitch);
+    let mut delta = Vec2::ZERO;
+    for mouse_move in mouse_motion_event_reader.iter() {
+      delta += mouse_move.delta;
     }
-  }
 
+    if delta == Vec2::ZERO {
+      return;
+    }
+    options.pitch = (options.pitch + delta.y * options.sensitivity * delta_time)
+      .clamp(-FRAC_PI_2 + 1.0, FRAC_PI_2);
+    options.yaw = options.yaw - delta.x * options.sensitivity * delta_time;
+    transform.rotation = Quat::from_axis_angle(Vec3::Y, options.yaw);
+    transform.rotation *= Quat::from_axis_angle(-Vec3::X, options.pitch);
+  }
+}

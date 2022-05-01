@@ -8,6 +8,7 @@ lazy_static = "1.4.0"
 noise = "0.7.0"
 futures-lite = "1.11.3"
 bevy = "0.7"
+block-mesh = "0.2.0"
 
 [dev-dependencies]
 proptest = "1.0"

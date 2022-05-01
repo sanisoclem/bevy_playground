@@ -3,7 +3,6 @@ use bevy::{
   tasks::{AsyncComputeTaskPool, Task},
 };
 use futures_lite::future;
-use std::collections::HashMap;
 
 // module organization doesn't make sense
 // maybe the layout abstraction doesn't work
@@ -36,7 +35,7 @@ pub struct Chunk {
 
 #[derive(Debug, Default, Component)]
 pub struct ChunkVoxelData {
-  pub voxels: HashMap<VoxelId, generator::VoxelType>,
+  pub voxels: Vec<generator::VoxelType>,
 }
 
 #[derive(Default)]
@@ -84,16 +83,12 @@ pub fn spawn_chunks(
       if tracker.try_spawn(&chunk) {
         // println!("Spawning {:?}", chunk);
         let pos = layout.chunk_to_space(&chunk);
-
-        let voxel_buffer = layout
-          .get_chunk_voxels(&chunk)
-          .into_iter()
-          .map(|id| (id, generator::VoxelType::Air))
-          .collect();
+        let origin = layout.get_origin(&chunk);
 
         // TODO: the voxel data might be better off in a resource
         // this allows access to the voxel data from an async task
-        let load_voxels_task = generator.load_voxel_data(&thread_pool, voxel_buffer);
+        let load_voxels_task =
+          generator.load_voxel_data(&thread_pool, origin, layout.shape.clone());
 
         // create entities for chunks
         commands
@@ -163,11 +158,13 @@ pub fn load_voxels(
 
 pub fn build_chunk_mesh(
   mut commands: Commands,
+  layout: Res<layout::CubicVoxelLayout>,
   thread_pool: Res<AsyncComputeTaskPool>,
   query: Query<(Entity, &Chunk, &ChunkVoxelData), Without<Handle<Mesh>>>,
 ) {
   for (entity, chunk, voxel_data) in query.iter() {
-    let gen_mesh_task = mesher::generate_mesh(&thread_pool, &voxel_data.voxels, 0);
+    let gen_mesh_task =
+      mesher::generate_mesh(&thread_pool, &voxel_data.voxels, layout.shape.clone(), 0);
     info!("generating mesh for {:?}", chunk.id);
 
     commands.entity(entity).insert(gen_mesh_task);
