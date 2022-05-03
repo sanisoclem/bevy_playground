@@ -70,7 +70,13 @@ pub fn generate_mesh(
         indices.extend_from_slice(&i);
         positions.extend_from_slice(&p);
         normals.extend_from_slice(&n);
-        uvs.extend_from_slice(&face.tex_coords(block_mesh::geometry::Axis::Z, false, &quad));
+        uvs.extend_from_slice(&face.tex_coords(RIGHT_HANDED_Y_UP_CONFIG.u_flip_face, false, &quad));
+        // uvs.extend_from_slice(&[
+        //   [0., 0.],
+        //   [0., 1.],
+        //   [1., 1.],
+        //   [1., 0.]
+        // ]);
       }
     }
 

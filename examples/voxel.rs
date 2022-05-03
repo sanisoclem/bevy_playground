@@ -56,7 +56,6 @@ fn setup(
   const HALF_SIZE: f32 = 10.0;
   commands.spawn_bundle(DirectionalLightBundle {
     directional_light: DirectionalLight {
-      illuminance: 10000.0,
       shadow_projection: OrthographicProjection {
         left: -HALF_SIZE,
         right: HALF_SIZE,

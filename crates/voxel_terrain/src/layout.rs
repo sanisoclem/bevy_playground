@@ -214,10 +214,10 @@ impl CubicVoxelLayout {
 
   pub fn space_to_voxel(&self, space: &Vec3) -> VoxelId {
     let center = self.get_center_voxel(&self.origin);
-    let divisor = self.voxel_side_length as i32;
-    let x = (space.x as i32).div_euclid(divisor);
-    let y = (space.y as i32).div_euclid(self.chunk_voxel_height as i32);
-    let z = (space.z as i32).div_euclid(divisor);
+    let divisor = self.voxel_side_length;
+    let x = space.x.div_euclid(divisor) as i32;
+    let y = space.y.div_euclid(divisor) as i32;
+    let z = space.z.div_euclid(divisor) as i32;
     VoxelId(x, y, z) + center
   }
 

@@ -15,11 +15,12 @@ mod tracker;
 
 use layout::*;
 
-// #[derive(Debug)]
-// pub enum VoxelTerrainEvents {
-//   ChunkSpawned(Entity),
-//   ChunkDespawned(Entity)
-// }
+#[derive(Default)]
+pub struct TempTerrainMaterial {
+  pub material: Handle<StandardMaterial>,
+  pub tex: Handle<Image>,
+  pub normal: Handle<Image>
+}
 
 #[derive(Default, Debug, Component)]
 pub struct ChunkSpawner {
@@ -47,12 +48,15 @@ impl Plugin for VoxelTerrainPlugin {
       .init_resource::<tracker::ChunkTracker>()
       .init_resource::<generator::VoxelGenerator>()
       .init_resource::<layout::CubicVoxelLayout>()
+      .init_resource::<TempTerrainMaterial>()
+      .add_startup_system(load_textures)
       .add_system(spawn_chunks)
       .add_system(calc_chunk_distances)
       .add_system(load_voxels)
       .add_system(build_chunk_mesh)
       .add_system(attach_chunk_mesh)
-      .add_system(despawn_chunks);
+      .add_system(despawn_chunks)
+      .add_system(set_texture_tiled);
   }
 }
 
@@ -160,7 +164,7 @@ pub fn build_chunk_mesh(
   mut commands: Commands,
   layout: Res<layout::CubicVoxelLayout>,
   thread_pool: Res<AsyncComputeTaskPool>,
-  query: Query<(Entity, &Chunk, &ChunkVoxelData), Without<Handle<Mesh>>>,
+  query: Query<(Entity, &Chunk, &ChunkVoxelData), (Without<Task<Mesh>>, Without<Handle<Mesh>>)>,
 ) {
   for (entity, chunk, voxel_data) in query.iter() {
     let gen_mesh_task =
@@ -171,22 +175,63 @@ pub fn build_chunk_mesh(
   }
 }
 
+pub fn load_textures(
+  asset_server: Res<AssetServer>,
+  mut terrain_mat: ResMut<TempTerrainMaterial>,
+  mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+  // tempmorary, should load textures separately
+  // and probably need a custom terrain material
+  terrain_mat.tex = asset_server.load("textures/test.png");
+  terrain_mat.normal = asset_server.load("textures/test_n.png");
+
+  terrain_mat.material =  materials.add(StandardMaterial {
+    base_color_texture: Some(terrain_mat.tex.clone()),
+    normal_map_texture: Some(terrain_mat.normal.clone()),
+    perceptual_roughness: 0.89,
+    ..default()
+  });
+}
+
+
+pub fn set_texture_tiled(
+  mut texture_events: EventReader<AssetEvent<Image>>,
+  mut textures: ResMut<Assets<Image>>,
+) {
+  // wgpu's sampler settings are currently hard coded,
+  // quick and dirty way to get a tiled texture
+  for event in texture_events.iter() {
+      match event {
+          AssetEvent::Created { handle } => {
+              if let Some(mut texture) = textures.get_mut(handle) {
+                info!("set address mode");
+                texture.sampler_descriptor.address_mode_u = bevy::render::render_resource::AddressMode::Repeat;
+                texture.sampler_descriptor.address_mode_v = bevy::render::render_resource::AddressMode::Repeat;
+                texture.sampler_descriptor.address_mode_w = bevy::render::render_resource::AddressMode::Repeat;
+              }
+          }
+          _ => (),
+      }
+  }
+}
+
 pub fn attach_chunk_mesh(
   layout: Res<layout::CubicVoxelLayout>,
   mut commands: Commands,
   mut meshes: ResMut<Assets<Mesh>>,
   mut materials: ResMut<Assets<StandardMaterial>>,
+  terrain_mat: Res<TempTerrainMaterial>,
   mut tasks: Query<(Entity, &Chunk, &mut Task<Mesh>), Without<Handle<Mesh>>>,
 ) {
   for (entity, chunk, mut task) in tasks.iter_mut() {
     if let Some(mesh) = future::block_on(future::poll_once(&mut *task)) {
-      info!("generated mesh for {:?}", chunk.id);
-
       commands.entity(entity).insert_bundle(PbrBundle {
         mesh: meshes.add(mesh),
+        //material: terrain_mat.material.clone(),
         material: materials.add(StandardMaterial {
-          base_color: Color::LIME_GREEN,
-          perceptual_roughness: 1.0,
+          base_color_texture: Some(terrain_mat.tex.clone()),
+          normal_map_texture: Some(terrain_mat.normal.clone()),
+          perceptual_roughness: 0.89,
           ..default()
         }),
         transform: Transform::from_translation(layout.chunk_to_space(&chunk.id)),
