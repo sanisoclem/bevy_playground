@@ -7,7 +7,7 @@ use block_mesh::{
   ndshape::{RuntimeShape, Shape},
   MergeVoxel, Voxel, VoxelVisibility,
 };
-use noise::*;
+use noise::{utils::*, *};
 
 #[derive(Debug, PartialEq, Clone, Eq, Copy)]
 pub enum VoxelType {
@@ -54,7 +54,10 @@ impl VoxelGenerator {
       let bias = 0.0;
       let scale = [0.01, 0.01, 1.0];
       let perlin = Perlin::new();
-      let ridged = RidgedMulti::new();
+      let ridged = RidgedMulti::new()
+        .set_frequency(2.0)
+        .set_lacunarity(2.20703125)
+        .set_octaves(3);
       let fbm = Fbm::new();
       let blend = Blend::new(&perlin, &ridged, &fbm);
       let scale_bias = ScaleBias::new(&blend).set_bias(bias);
@@ -64,15 +67,9 @@ impl VoxelGenerator {
       let mut buffer = Vec::with_capacity(shape.usize());
       for i in 0..shape.size() {
         let [x, y, z] = shape.delinearize(i);
-        let result = ((generator.get([x as f64 + origin.x() as f64, z as f64 + origin.z() as f64])
-          as f32)
-          + 1.0)
-          * 10.;
-        buffer.push(if y > 1 && y as f32 > result {
-          VoxelType::Air
-        } else {
-          VoxelType::Dirt
-        });
+        let height = generator.get([x as f64 + origin.x() as f64, z as f64 + origin.z() as f64]);
+        let sdf = y as f32 - ((height + 1.0) * 25. + 1.0) as f32;
+        buffer.push(sdf);
       }
       super::ChunkVoxelData { voxels: buffer }
     })

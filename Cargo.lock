@@ -1454,6 +1454,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77f3309417938f28bf8228fcff79a4a37103981e3e186d2ccd19c74b38f4eb71"
 
 [[package]]
+name = "fast-surface-nets"
+version = "0.2.0"
+source = "git+https://github.com/bonsairobo/fast-surface-nets-rs?branch=main#514af7b42618dcd083a323547037fbf9b8834d53"
+dependencies = [
+ "glam 0.20.5",
+ "ndshape",
+]
+
+[[package]]
 name = "fastrand"
 version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3490,6 +3499,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "block-mesh",
+ "fast-surface-nets",
  "futures-lite",
  "lazy_static",
  "noise",

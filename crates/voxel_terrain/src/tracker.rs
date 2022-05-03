@@ -10,7 +10,6 @@ impl ChunkTracker {
   pub fn try_spawn(&mut self, chunk: &ChunkId) -> bool {
     if !self.loaded_chunks.contains(chunk) {
       self.loaded_chunks.insert(chunk.clone());
-      info!("spawned chunk {:?}", chunk);
       true
     } else {
       false
@@ -18,10 +17,6 @@ impl ChunkTracker {
   }
 
   pub fn try_despawn(&mut self, chunk: &ChunkId) -> bool {
-    let retval = self.loaded_chunks.remove(chunk);
-    if retval {
-      info!("despawned chunk {:?}", chunk);
-    }
-    retval
+    self.loaded_chunks.remove(chunk)
   }
 }

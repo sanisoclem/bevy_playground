@@ -36,7 +36,7 @@ pub struct Chunk {
 
 #[derive(Debug, Default, Component)]
 pub struct ChunkVoxelData {
-  pub voxels: Vec<generator::VoxelType>,
+  pub voxels: Vec<f32>,
 }
 
 #[derive(Default)]
@@ -150,7 +150,6 @@ pub fn load_voxels(
   // check if voxel data load task is complete
   for (entity, chunk, mut task) in tasks.iter_mut() {
     if let Some(voxel_data) = future::block_on(future::poll_once(&mut *task)) {
-      info!("voxels loaded for {:?}", chunk.id);
       // Add our new PbrBundle of components to our tagged entity
       commands
         .entity(entity)
@@ -169,7 +168,6 @@ pub fn build_chunk_mesh(
   for (entity, chunk, voxel_data) in query.iter() {
     let gen_mesh_task =
       mesher::generate_mesh(&thread_pool, &voxel_data.voxels, layout.shape.clone(), 0);
-    info!("generating mesh for {:?}", chunk.id);
 
     commands.entity(entity).insert(gen_mesh_task);
   }
@@ -204,7 +202,6 @@ pub fn set_texture_tiled(
       match event {
           AssetEvent::Created { handle } => {
               if let Some(mut texture) = textures.get_mut(handle) {
-                info!("set address mode");
                 texture.sampler_descriptor.address_mode_u = bevy::render::render_resource::AddressMode::Repeat;
                 texture.sampler_descriptor.address_mode_v = bevy::render::render_resource::AddressMode::Repeat;
                 texture.sampler_descriptor.address_mode_w = bevy::render::render_resource::AddressMode::Repeat;

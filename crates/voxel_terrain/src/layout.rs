@@ -231,7 +231,7 @@ impl CubicVoxelLayout {
 }
 impl Default for CubicVoxelLayout {
   fn default() -> Self {
-    Self::new(ChunkId::default(), 1.0, 50, 20)
+    Self::new(ChunkId::default(), 1.0, 50, 50)
   }
 }
 
