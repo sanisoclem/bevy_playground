@@ -35,6 +35,16 @@ fn setup(
     transform: Transform::from_xyz(0.0, 20.5, 0.0),
     ..default()
   });
+  // plane
+  commands.spawn_bundle(PbrBundle {
+    mesh: meshes.add(Mesh::from(shape::Plane { size: 100000.0 })),
+    material: materials.add(StandardMaterial {
+      base_color: Color::BLUE,
+      ..default()
+    }),
+    transform: Transform::from_xyz(0.0, 25.5, 0.0),
+    ..default()
+  });
   // light
   commands.spawn_bundle(PointLightBundle {
     point_light: PointLight {
