@@ -16,7 +16,7 @@ camera = { path = "./crates/camera", version = "0.1.0" }
 debug = { path = "./crates/debug", version = "0.1.0" }
 voxel_terrain = { path = "./crates/voxel_terrain", version = "0.1.0" }
 bevy = "0.7"
-
+bevy_rapier3d = { version = "*", features = [ "simd-stable", "debug-render" ] }
 
 [[example]]
 name = "voxel"

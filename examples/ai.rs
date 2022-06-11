@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 const ARENA_SIZE: f32 = 1000.;
 const WALL_HEIGHT: f32 = 50.;
@@ -16,65 +17,121 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_plugin(debug::DebugUIPlugin)
     .add_plugin(camera::SpectatorCameraPlugin)
-    .add_startup_system(setup)
+    .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+    .add_plugin(RapierDebugRenderPlugin::default())
+    .add_startup_system(spawn_critters)
+    .add_startup_system(spawn_arena)
     .run();
 }
+fn spawn_critters(
+  mut commands: Commands,
+  mut meshes: ResMut<Assets<Mesh>>,
+  mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+  commands
+    .spawn_bundle(PbrBundle {
+      mesh: meshes.add(Mesh::from(shape::Icosphere { radius: 1.0, subdivisions: 20 })),
+      material: materials.add(StandardMaterial {
+        base_color: Color::LIME_GREEN,
+        ..default()
+      }),
+      transform: Transform::from_xyz(0.0, 50.0, 0.0),
+      ..default()
+    })
+    .insert(RigidBody::Dynamic)
+    .insert(Collider::ball(1.0))
+    .insert(Restitution::coefficient(0.7));
+}
 
-fn setup(
+fn spawn_arena(
   mut commands: Commands,
   mut meshes: ResMut<Assets<Mesh>>,
   mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
   // SOUTH WALL
   commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Box::new(ARENA_SIZE, WALL_HEIGHT, WALL_THICKNESS))),
+    mesh: meshes.add(Mesh::from(shape::Box::new(
+      ARENA_SIZE,
+      WALL_HEIGHT,
+      WALL_THICKNESS,
+    ))),
     material: materials.add(StandardMaterial {
       base_color: Color::LIME_GREEN,
       ..default()
     }),
-    transform: Transform::from_xyz(0.0, WALL_HEIGHT/2., (ARENA_SIZE/2.) - (WALL_THICKNESS/2.)),
+    transform: Transform::from_xyz(
+      0.0,
+      WALL_HEIGHT / 2.,
+      (ARENA_SIZE / 2.) - (WALL_THICKNESS / 2.),
+    ),
     ..default()
   });
   // NORTH WALL
   commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Box::new(ARENA_SIZE, WALL_HEIGHT, WALL_THICKNESS))),
+    mesh: meshes.add(Mesh::from(shape::Box::new(
+      ARENA_SIZE,
+      WALL_HEIGHT,
+      WALL_THICKNESS,
+    ))),
     material: materials.add(StandardMaterial {
       base_color: Color::LIME_GREEN,
       ..default()
     }),
-    transform: Transform::from_xyz(0.0, WALL_HEIGHT/2., (ARENA_SIZE/-2.) + (WALL_THICKNESS/2.)),
+    transform: Transform::from_xyz(
+      0.0,
+      WALL_HEIGHT / 2.,
+      (ARENA_SIZE / -2.) + (WALL_THICKNESS / 2.),
+    ),
     ..default()
   });
   // EAST WALL
   commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Box::new(WALL_THICKNESS, WALL_HEIGHT, ARENA_SIZE - WALL_THICKNESS * 2.))),
+    mesh: meshes.add(Mesh::from(shape::Box::new(
+      WALL_THICKNESS,
+      WALL_HEIGHT,
+      ARENA_SIZE - WALL_THICKNESS * 2.,
+    ))),
     material: materials.add(StandardMaterial {
       base_color: Color::AQUAMARINE,
       ..default()
     }),
-    transform: Transform::from_xyz((ARENA_SIZE/2.) - (WALL_THICKNESS/2.), WALL_HEIGHT/2., 0.),
+    transform: Transform::from_xyz(
+      (ARENA_SIZE / 2.) - (WALL_THICKNESS / 2.),
+      WALL_HEIGHT / 2.,
+      0.,
+    ),
     ..default()
   });
   // WEST WALL
   commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Box::new(WALL_THICKNESS, WALL_HEIGHT, ARENA_SIZE - WALL_THICKNESS * 2.))),
+    mesh: meshes.add(Mesh::from(shape::Box::new(
+      WALL_THICKNESS,
+      WALL_HEIGHT,
+      ARENA_SIZE - WALL_THICKNESS * 2.,
+    ))),
     material: materials.add(StandardMaterial {
       base_color: Color::AQUAMARINE,
       ..default()
     }),
-    transform: Transform::from_xyz((ARENA_SIZE/-2.) + (WALL_THICKNESS/2.), WALL_HEIGHT/2., 0.),
+    transform: Transform::from_xyz(
+      (ARENA_SIZE / -2.) + (WALL_THICKNESS / 2.),
+      WALL_HEIGHT / 2.,
+      0.,
+    ),
     ..default()
   });
   // ARENA GROUND
-  commands.spawn_bundle(PbrBundle {
-    mesh: meshes.add(Mesh::from(shape::Plane { size: ARENA_SIZE })),
-    material: materials.add(StandardMaterial {
-      base_color: Color::NAVY,
+  commands
+    .spawn_bundle(PbrBundle {
+      mesh: meshes.add(Mesh::from(shape::Plane { size: ARENA_SIZE })),
+      material: materials.add(StandardMaterial {
+        base_color: Color::NAVY,
+        ..default()
+      }),
+      transform: Transform::from_xyz(0.0, 0.0, 0.0),
       ..default()
-    }),
-    transform: Transform::from_xyz(0.0, 0.0, 0.0),
-    ..default()
-  });
+    })
+    .insert(Collider::cuboid(ARENA_SIZE / 2., 0.1, ARENA_SIZE / 2.));
   // light
   commands.spawn_bundle(PointLightBundle {
     point_light: PointLight {
