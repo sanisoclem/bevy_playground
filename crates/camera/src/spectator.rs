@@ -29,7 +29,8 @@ impl Plugin for SpectatorCameraPlugin {
   fn build(&self, app: &mut App) {
     app
       .add_startup_system(setup)
-      .add_system(camera_movement_system);
+      .add_system(camera_movement_system)
+      .add_plugin(SkyboxPlugin::from_image_file("sky1.png"));
   }
 }
 
@@ -39,7 +40,8 @@ pub fn setup(mut commands: Commands, mut window: ResMut<Windows>) {
       transform: Transform::from_xyz(0., 10.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
       ..default()
     })
-    .insert(SpectatorCamera::default());
+    .insert(SpectatorCamera::default())
+    .insert(SkyboxCamera);
 
   if let Some(window) = window.get_primary_mut() {
     window.set_cursor_visibility(false);
