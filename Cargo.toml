@@ -21,3 +21,7 @@ bevy = "0.7"
 [[example]]
 name = "voxel"
 path = "examples/voxel.rs"
+
+[[example]]
+name = "ai"
+path = "examples/ai.rs"
