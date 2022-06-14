@@ -1,0 +1,9 @@
+[package]
+name = "debug"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.7"
+image = "0.23"
+itertools = "0.10"
