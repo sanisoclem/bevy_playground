@@ -19,7 +19,7 @@ use layout::*;
 pub struct TempTerrainMaterial {
   pub material: Handle<StandardMaterial>,
   pub tex: Handle<Image>,
-  pub normal: Handle<Image>
+  pub normal: Handle<Image>,
 }
 
 #[derive(Default, Debug, Component)]
@@ -183,14 +183,13 @@ pub fn load_textures(
   terrain_mat.tex = asset_server.load("textures/test.png");
   terrain_mat.normal = asset_server.load("textures/test_n.png");
 
-  terrain_mat.material =  materials.add(StandardMaterial {
+  terrain_mat.material = materials.add(StandardMaterial {
     base_color_texture: Some(terrain_mat.tex.clone()),
     normal_map_texture: Some(terrain_mat.normal.clone()),
     perceptual_roughness: 0.89,
     ..default()
   });
 }
-
 
 pub fn set_texture_tiled(
   mut texture_events: EventReader<AssetEvent<Image>>,
@@ -199,16 +198,19 @@ pub fn set_texture_tiled(
   // wgpu's sampler settings are currently hard coded,
   // quick and dirty way to get a tiled texture
   for event in texture_events.iter() {
-      match event {
-          AssetEvent::Created { handle } => {
-              if let Some(mut texture) = textures.get_mut(handle) {
-                texture.sampler_descriptor.address_mode_u = bevy::render::render_resource::AddressMode::Repeat;
-                texture.sampler_descriptor.address_mode_v = bevy::render::render_resource::AddressMode::Repeat;
-                texture.sampler_descriptor.address_mode_w = bevy::render::render_resource::AddressMode::Repeat;
-              }
-          }
-          _ => (),
+    match event {
+      AssetEvent::Created { handle } => {
+        if let Some(mut texture) = textures.get_mut(handle) {
+          texture.sampler_descriptor.address_mode_u =
+            bevy::render::render_resource::AddressMode::Repeat;
+          texture.sampler_descriptor.address_mode_v =
+            bevy::render::render_resource::AddressMode::Repeat;
+          texture.sampler_descriptor.address_mode_w =
+            bevy::render::render_resource::AddressMode::Repeat;
+        }
       }
+      _ => (),
+    }
   }
 }
 
@@ -224,7 +226,7 @@ pub fn attach_chunk_mesh(
     if let Some(mesh) = future::block_on(future::poll_once(&mut *task)) {
       commands.entity(entity).insert_bundle(PbrBundle {
         mesh: meshes.add(mesh),
-        //material: terrain_mat.material.clone(),
+        // material: terrain_mat.material.clone(),
         material: materials.add(StandardMaterial {
           base_color_texture: Some(terrain_mat.tex.clone()),
           normal_map_texture: Some(terrain_mat.normal.clone()),

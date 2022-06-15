@@ -54,14 +54,12 @@ impl VoxelGenerator {
       let bias = 0.0;
       let scale = [0.01, 0.01, 1.0];
       let bg = Perlin::new();
-      //let bg_scaled = ScaleBias::new(&bg).set_bias(bias).set_scale(0.1);
+      // let bg_scaled = ScaleBias::new(&bg).set_bias(bias).set_scale(0.1);
       let ridged = RidgedMulti::new()
         .set_frequency(2.0)
         .set_lacunarity(2.20703125)
         .set_octaves(3);
-      let ridged_scaled =
-        ScalePoint::new(&ridged)
-        .set_all_scales(0.5, 0.5, 1.0, 1.0);
+      let ridged_scaled = ScalePoint::new(&ridged).set_all_scales(0.5, 0.5, 1.0, 1.0);
       let fbm = Fbm::new();
       let t = Billow::new();
 

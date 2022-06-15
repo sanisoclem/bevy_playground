@@ -29,7 +29,16 @@ pub fn generate_mesh(
   // the mesh hmmm... maybe we need some sort of double buffer?
   // edits are made in the front buffer while we use the back buffer to generate the mesh
   // we swap buffers if there are changes in the front buffer and mesh generation is complete
-  let v = voxels.iter().map(|sdf| if *sdf > 0.0 { VoxelType::Air } else { VoxelType::Dirt }).collect::<Vec<_>>();
+  let v = voxels
+    .iter()
+    .map(|sdf| {
+      if *sdf > 0.0 {
+        VoxelType::Air
+      } else {
+        VoxelType::Dirt
+      }
+    })
+    .collect::<Vec<_>>();
 
   thread_pool.spawn(async move {
     let scale = 1.0;
@@ -106,9 +115,13 @@ pub fn generate_mesh2(
 
     let [x, y, z] = shape.as_array();
     let mut buffer = fast_surface_nets::SurfaceNetsBuffer::default();
-    fast_surface_nets::surface_nets(v.as_slice(), &shape,
+    fast_surface_nets::surface_nets(
+      v.as_slice(),
+      &shape,
       [0; 3],
-      [x - 1, y - 1, z - 1], &mut buffer);
+      [x - 1, y - 1, z - 1],
+      &mut buffer,
+    );
 
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let num_vertices = buffer.positions.len();
