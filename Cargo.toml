@@ -1,12 +1,11 @@
 [package]
-name = "bevy_procedural_gen"
+name = "bevy_playground"
 version = "0.1.0"
 authors = ["Jerahmeel Cosinas <me@jerahmeelcosinas.net>"]
-repository = "https://github.com/sanisoclem/bevy_procedural_gen"
+repository = "https://github.com/sanisoclem/bevy_playground"
 edition = "2021"
 
 [dependencies]
-
 
 [workspace]
 members = ["crates/*"]
